@@ -7,6 +7,7 @@ import {
   Button,
   ScrollView,
   SafeAreaView,
+  TouchableOpacity,
 } from 'react-native';
 import {DataTable} from 'react-native-paper';
 import {NumberFormat, NumberFormatBase} from 'react-number-format';
@@ -17,12 +18,30 @@ import {useSelector} from 'react-redux';
 import Navbar from './../../components/Navbar';
 import tw from 'twrnc';
 import {Image} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 const Cart = ({route}) => {
+  const navigation = useNavigation();
+
   const [nomor, setNomor] = useState(1);
 
   const user = useSelector(state => state.user);
   const cart = useSelector(state => state.cart);
+
+  const [dataAmountCheckout, setDataAmountCheckout] = useState(0);
+  const [dataCheckout, setDataCheckout] = useState([]);
+
+  useEffect(() => {
+    var totalAmount = 0;
+    var calculateAmount = 0;
+    cart.forEach(element => {
+      const amount = element.product_price * element.qty;
+
+      totalAmount = calculateAmount += amount;
+    });
+    setDataAmountCheckout(totalAmount);
+    console.log({dataAmountCheckout});
+  }, [dataAmountCheckout]);
 
   const numberOfItemsPerPageList = [1];
   const [page, setPage] = React.useState(0);
@@ -95,7 +114,9 @@ const Cart = ({route}) => {
               cart.map(item => {
                 const firstProduct = item.product_picture.split(',')[0] ?? [];
                 return (
-                  <View style={tw`bg-white shadow rounded-lg p-5 mb-5`}>
+                  <View
+                    key={item.product_id}
+                    style={tw`bg-white shadow rounded-lg p-5 mb-5`}>
                     <View style={tw`flex flex-row mb-4`}>
                       <Image
                         style={tw`w-[60px] h-[60px]`}
@@ -111,10 +132,6 @@ const Cart = ({route}) => {
                     <Text style={tw`text-black`}>
                       Price : Rp{item.product_price}
                     </Text>
-                    <Text>{'\n'}</Text>
-                    <Text>{'\n'}</Text>
-                    <Text>{'\n'}</Text>
-                    <Text>{'\n'}</Text>
                     <Text style={tw`text-black`}>Quantity : {item.qty}</Text>
                     <Text style={tw`text-black`}>
                       Sub Price : Rp{item.product_price * item.qty}
@@ -133,11 +150,15 @@ const Cart = ({route}) => {
 
       <View style={tw`bg-white shadow-md absolute bottom-0 w-full`}>
         <View style={tw`flex flex-row justify-between`}>
-          <Text style={tw`text-black font-semibold p-5`}>Amount</Text>
-          <Text
-            style={tw`text-black font-semibold p-5 text-white shadow w-[140px] text-center bg-pink-400`}>
-            Checkout
+          <Text style={tw`text-black font-semibold p-5`}>
+            Amount: Rp{dataAmountCheckout}
           </Text>
+          <TouchableOpacity onPress={() => navigation.push('CheckoutScreen')}>
+            <Text
+              style={tw`text-black font-semibold p-5 text-white shadow w-[140px] text-center bg-pink-400`}>
+              Checkout
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>

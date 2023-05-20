@@ -7,6 +7,7 @@ import Home from './../screens/Home/index';
 import Login from './../screens/Login/index';
 import Profile from './../screens/Profile/index';
 import Cart from './../screens/Cart/index';
+import Checkout from './../screens/Checkout/index';
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +33,11 @@ const Routing = () => (
       <Stack.Screen
         name="CartScreen"
         component={Cart}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="CheckoutScreen"
+        component={Checkout}
         options={{headerShown: false}}
       />
     </Stack.Navigator>
