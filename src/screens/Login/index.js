@@ -14,12 +14,6 @@ const Login = ({navigation}) => {
 
   const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   if (user && user.isLoggedIn) {
-  //     navigation.replace('HomeScreen');
-  //   }
-  // }, []);
-
   const onLogin = () => {
     let dataUser = {
       email,

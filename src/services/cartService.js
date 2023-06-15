@@ -4,25 +4,20 @@ const doAddToCart = async cart => {
   console.log('_____SERVICE_____');
   console.log({cart});
 
-  const toCart = [cart];
+  const cartData = await AsyncStorage.getItem('cart');
 
-  // AsyncStorage.setItem('cart', JSON.stringify(toCart));
+  let cartItems = [];
+  if (cartData) {
+    cartItems = JSON.parse(cartData);
+  }
 
-  const getCart = await AsyncStorage.getItem('cart');
-  // console.log({getCart});
+  // Add new item to cart
+  cartItems.push(cart);
 
-  // getCart
-  //   .then(asd => {
-  //     console.log('ok');
-  //     console.log({status});
-  //     return {status, message, data};
-  //   })
-  //   .catch(error => {
-  //     console.log('fail');
-  //     status = 'failed';
-  //     message = 'Shit! ' + error.toString();
-  //     data = {};
-  //   });
+  // Save updated cart data
+  await AsyncStorage.setItem('cart', JSON.stringify(cartItems));
+
+  // AsyncStorage.setItem('cart', JSON.stringify(cart));
 
   return {
     status: 'success',

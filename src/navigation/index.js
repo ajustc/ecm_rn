@@ -6,8 +6,13 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Home from './../screens/Home/index';
 import Login from './../screens/Login/index';
 import Profile from './../screens/Profile/index';
+import ProfileEdit from './../screens/ProfileEdit/index';
 import Cart from './../screens/Cart/index';
 import Checkout from './../screens/Checkout/index';
+import OrderList from './../screens/OrderList/index';
+import OrderDetail from './../screens/OrderDetail/index';
+
+import Webview from './../screens/Webview/index';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +36,11 @@ const Routing = () => (
         options={{headerShown: false}}
       />
       <Stack.Screen
+        name="ProfileEditScreen"
+        component={ProfileEdit}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
         name="CartScreen"
         component={Cart}
         options={{headerShown: false}}
@@ -38,6 +48,22 @@ const Routing = () => (
       <Stack.Screen
         name="CheckoutScreen"
         component={Checkout}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="OrderHistory"
+        component={OrderList}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="OrderDetail"
+        component={OrderDetail}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="WebviewScreen"
+        component={Webview}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

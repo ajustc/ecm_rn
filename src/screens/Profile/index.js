@@ -23,10 +23,14 @@ import {API_URL} from './../../services/constants';
 // components
 import Navbar from './../../components/Navbar';
 import {useNavigation} from '@react-navigation/native';
+import axios from 'axios';
+import {useDispatch, useSelector} from 'react-redux';
+import {logout} from '../../actions/auth';
 
 const Profile = props => {
-  const {navigation} = props;
+  const navigation = useNavigation();
   const [refresh, setRefresh] = useState(false);
+
   const onRefresh = useCallback(() => {
     setRefresh(true);
 
@@ -35,52 +39,69 @@ const Profile = props => {
     }, 1500);
   }, []);
 
-  // Ambil info user yang sedang login
-  const [id, setId] = useState('');
-  const [fullname, setFullname] = useState('');
-  const [email, setEmail] = useState('');
-  const [telepon, setTelepon] = useState('');
-  const [token, setToken] = useState('');
+  const user = useSelector(state => state.user);
 
-  // Ambil info riwayat belanja user by ID yang sdg login
-  const [datariwayat, setDatariwayat] = useState([]);
-  const [tgl, setTgl] = useState('');
-  const [total, setTotal] = useState('');
-  const [alamat, setAlamat] = useState('');
-  const [status, setStatus] = useState('');
+  const [dataUser, setDataUser] = useState({
+    isLoggedIn: false,
+  });
+
+  const getUser = async () => {
+    try {
+      const savedUser = await AsyncStorage.getItem('user');
+      const currentUser = JSON.parse(savedUser);
+
+      setDataUser(currentUser);
+      console.log({currentUser});
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
-    // console.log(datariwayat);
+    getUser();
+    console.log({dataUser});
   }, []);
 
-  const redirectLogin = () => {
-    Alert.alert('Warning', 'Please Login!');
-    navigation.navigate('Login');
+  const GetOrderList = async () => {
+    await axios
+      .get(
+        `${API_URL}api/auth/order/showbyuserid/${dataUser?.user?.data?.uid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${dataUser.access_token}`,
+          },
+        },
+      )
+      .then(success => {
+        const response = success?.data ?? [];
+        console.log({response});
+      })
+      .catch(error => {
+        console.log({error});
+      });
   };
 
-  const getLoc = async () => {
-    const a = await AsyncStorage.getAllItem();
-    console.log('all ses :', a);
+  const navigateOrderHistory = () => {
+    navigation.push('OrderHistory');
   };
 
-  const deletelocStorage = () => {
-    console.log('Succesfully logout!');
-    AsyncStorage.clearAll();
-    navigation.push('MyTabs');
+  const navigateEditProfile = () => {
+    navigation.push('ProfileEditScreen');
   };
 
-  const logout = () => {
-    Alert.alert('Peringatan', 'Anda yakin logout?', [
-      {
-        text: 'Tidak',
-        onPress: () => console.log('Tidak'),
-      },
-      {
-        text: 'Ya',
-        onPress: () => deletelocStorage(),
-      },
-    ]);
+  const dispatch = useDispatch();
+  const navigateLogout = () => {
+    dispatch(logout()).then(response => {
+      if (response.status === 'success') {
+        AsyncStorage.clear();
+        navigation.replace('HomeScreen');
+      }
+    });
   };
+
+  useEffect(() => {
+    GetOrderList();
+  }, []);
 
   return (
     <ScrollView
@@ -94,140 +115,63 @@ const Profile = props => {
           <View style={tw`p-[20px]`}>
             <Image
               style={tw`w-[120px] h-[120px] rounded-full mb-[25px] self-center`}
-              source={{uri: `https://i.pravatar.cc/80?img=${fullname}`}}
+              source={{
+                uri: `https://i.pravatar.cc/80?img=rio`,
+              }}
             />
-            <View style={tw`flex-row justify-center`}>
+            <View style={tw`flex justify-center`}>
               <Text style={tw`text-[18px] font-light mb-[8px] text-black`}>
                 Nama
               </Text>
               <Text style={tw`text-[18px] font-light mb-[8px] text-black`}>
-                {fullname}
+                {dataUser?.user?.data?.name}
               </Text>
             </View>
-            <View style={tw`flex-row justify-center`}>
+            <View style={tw`flex justify-center`}>
               <Text style={tw`text-[18px] font-light mb-[8px] text-black`}>
                 Email
               </Text>
               <Text style={tw`text-[18px] font-light mb-[8px] text-black`}>
-                {email}
+                {dataUser?.user?.data?.email}
               </Text>
             </View>
-            <View style={tw`flex-row justify-center`}>
+            <View style={tw`flex justify-center`}>
               <Text style={tw`text-[18px] font-light mb-[8px] text-black`}>
                 Telepon
               </Text>
               <Text style={tw`text-[18px] font-light mb-[8px] text-black`}>
-                {telepon}
+                {dataUser?.user?.data?.phone}
               </Text>
             </View>
           </View>
         </View>
         <View>
-          {datariwayat <= 0 ? (
-            <Text style={tw`text-center self-center bg-pink-500 w-[250px] rounded py-3`}>No data history.</Text>
-          ) : (
-            <ScrollView horizontal>
-              <DataTable>
-                <DataTable.Header>
-                  <DataTable.Title>Tanggal</DataTable.Title>
-                  <DataTable.Title style={{right: 33}}>Status</DataTable.Title>
-                  <DataTable.Title style={{right: -30}}>Total</DataTable.Title>
-                  <DataTable.Title style={{right: 0}}>Opsi</DataTable.Title>
-                </DataTable.Header>
+          <TouchableOpacity
+            style={tw`mt-4`}
+            onPress={() => navigateEditProfile()}>
+            <Text
+              style={tw`text-center text-white self-center shadow bg-pink-500 w-[250px] rounded py-3`}>
+              Edit Profile
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={tw`mt-4`}
+            onPress={() => navigateOrderHistory()}>
+            <Text
+              style={tw`text-center text-white self-center shadow bg-pink-500 w-[250px] rounded py-3`}>
+              Order History
+            </Text>
+          </TouchableOpacity>
 
-                {datariwayat.map(riwayat => {
-                  return (
-                    <Riwayat
-                      key={riwayat.id_pembelian}
-                      idpembelian={riwayat.id_pembelian}
-                      tanggal={riwayat.tanggal_pembelian}
-                      status={riwayat.status_pembelian}
-                      total={riwayat.total_pembelian}
-                    />
-                  );
-                })}
-
-                <DataTable.Pagination
-                  page={1}
-                  numberOfPages={3}
-                  onPageChange={page => {
-                    console.log(page);
-                  }}
-                  label="1-2 of 6"
-                />
-              </DataTable>
-            </ScrollView>
-          )}
-        </View>
-        {/* <View>
-          <TouchableOpacity onPress={getLoc}>
-            <Text style={tw`text-center self-center bg-pink-500 w-[250px]`}>
-              GetSess
+          <TouchableOpacity style={tw`mt-5`} onPress={() => navigateLogout()}>
+            <Text
+              style={tw`text-center text-white self-center shadow bg-[#917FB3] w-[250px] rounded py-3`}>
+              Logout
             </Text>
           </TouchableOpacity>
         </View>
-        <View>
-          <TouchableOpacity onPress={logout}>
-            <Text style={tw`text-center self-center bg-pink-500 w-[250px]`}>
-              Log Out
-            </Text>
-          </TouchableOpacity>
-        </View> */}
       </View>
     </ScrollView>
-  );
-};
-
-const Riwayat = ({idpembelian, tanggal, status, total}) => {
-  const navigation = useNavigation();
-  return (
-    <DataTable.Row>
-      <DataTable.Cell style={{width: 90}}>{tanggal ?? '-'}</DataTable.Cell>
-      <DataTable.Cell style={{width: 170}}>{status ?? '-'}</DataTable.Cell>
-      <DataTable.Cell style={{width: 70}}>{total ?? '-'}</DataTable.Cell>
-      <DataTable.Cell>
-        <View style={tw`flex-col`}>
-          <TouchableOpacity
-            onPress={() =>
-              navigation.push('Nota', {
-                idpembelian: idpembelian,
-              })
-            }>
-            <Text
-              style={tw`bg-[#5bc0de] w-[100px] text-white text-center py-[7px] border-2 my-[10px]`}>
-              Nota
-            </Text>
-          </TouchableOpacity>
-          {status === 'Pending' ? (
-            <TouchableOpacity
-              onPress={() =>
-                navigation.push('Input Pembayaran', {
-                  idpembelian: idpembelian,
-                  tanggal: tanggal,
-                  total: total,
-                })
-              }>
-              <Text
-                style={tw`bg-[#5cb85c] w-[100px] text-white text-center py-[7px] border-2 my-[10px]`}>
-                Input
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              onPress={() =>
-                navigation.push('Lihat Pembayaran', {
-                  idpembelian: idpembelian,
-                })
-              }>
-              <Text
-                style={tw`bg-[#f0ad4e] w-[100px] text-white text-center py-[7px] border-2 my-[10px]`}>
-                Lihat
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </DataTable.Cell>
-    </DataTable.Row>
   );
 };
 

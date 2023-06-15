@@ -12,16 +12,17 @@ const logIn = async user => {
   await Axios.post(`${API_URL}api/auth/login`, user)
     .then(success => {
       console.log('then success');
-      AsyncStorage.setItem('user', JSON.stringify(user));
+      success.data.isLoggedIn = true;
+      AsyncStorage.setItem('user', JSON.stringify(success.data));
 
-      status  = 'success';
+      status = 'success';
       message = 'You are redirecting to home page';
-      data    = user;
+      data = success.data;
     })
     .catch(error => {
       console.log('catch success');
 
-      status  = 'failed';
+      status = 'failed';
       message = 'Shit! ' + error.toString();
     });
 

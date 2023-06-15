@@ -1,5 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Button} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+  Button,
+} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import tw from 'twrnc';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -26,13 +33,16 @@ const Home = ({navigation}) => {
     });
   };
 
-  const getProducts = () => {
-    Axios.get(`${API_URL}api/auth/product/index`).then(res => {
-      setProducts(res.data.data);
-      console.log('Get Index Produk', res.data);
-    }).catch(err => {
-      console.log({err});
-    });
+  const getProducts = async () => {
+    console.log({getProducts: `${API_URL}api/auth/product/index`});
+    await Axios.get(`${API_URL}api/auth/product/index`)
+      .then(res => {
+        setProducts(res.data.data);
+        console.log('Get Index Produk', res.data);
+      })
+      .catch(err => {
+        console.log({err: err.message});
+      });
   };
 
   useEffect(() => {
@@ -48,23 +58,29 @@ const Home = ({navigation}) => {
       <View style={tw`flex mt-4 justify-center items-center`}>
         {/* <Text style={{fontSize: 16}}>Welcome {user.user}</Text> */}
         {/* <Button onPress={() => onLogout()} title="Logout" /> */}
-        <View style={tw`flex-row flex-wrap justify-between`}>
-          {loading ? (
-            <Text style={tw`font-bold text-center`}>Loading</Text>
-          ) : (
-            products.map(product => {
-              return (
-                <Product
-                  key={product.product_id ?? ''}
-                  product_id={product.product_id ?? ''}
-                  product_name={product.product_name ?? ''}
-                  product_picture={product.product_picture ?? ''}
-                  product_price={product.product_price ?? ''}
-                />
-              );
-            })
-          )}
-        </View>
+        <SafeAreaView>
+          <ScrollView>
+            <View style={tw`flex-row flex-wrap justify-between`}>
+              {loading ? (
+                <Text style={tw`font-bold text-center`}>Loading</Text>
+              ) : (
+                products.map(product => {
+                  return (
+                    <Product
+                      key={product.product_id ?? ''}
+                      product_id={product.product_id ?? ''}
+                      product_name={product.product_name ?? ''}
+                      product_picture={product.product_picture ?? ''}
+                      product_price={product.product_price ?? ''}
+                      product_weight={Number(product.product_weight) ?? ''}
+                      product_discount={Number(product.product_discount) ?? ''}
+                    />
+                  );
+                })
+              )}
+            </View>
+          </ScrollView>
+        </SafeAreaView>
       </View>
     </>
   );

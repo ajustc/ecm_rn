@@ -8,40 +8,102 @@ import {
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
+  TextInput,
+  Alert,
 } from 'react-native';
 import {DataTable} from 'react-native-paper';
 import {NumberFormat, NumberFormatBase} from 'react-number-format';
 import Axios from 'axios';
-import {AsyncStorage} from '@react-native-async-storage/async-storage';
-import {API_URL} from './../../services/constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {API_URL, STORAGE_URL} from './../../services/constants';
 import {useSelector} from 'react-redux';
 import Navbar from './../../components/Navbar';
 import tw from 'twrnc';
 import {Image} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import axios from 'axios';
 
 const Cart = ({route}) => {
   const navigation = useNavigation();
 
-  const [nomor, setNomor] = useState(1);
-
   const user = useSelector(state => state.user);
   const cart = useSelector(state => state.cart);
 
+  // const dataUser = user;
+  // console.log({dataUserssssss: dataUser});
+
+  const [dataUser, setDataUser] = useState({
+    isLoggedIn: false,
+  });
+
+  const getUser = async () => {
+    try {
+      const savedUser = await AsyncStorage.getItem('user');
+      const currentUser = JSON.parse(savedUser);
+
+      setDataUser(currentUser);
+      console.log({currentUser});
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  const [cartState, setCartState] = useState([]);
+
+  const getCart = async () => {
+    try {
+      const savedCart = await AsyncStorage.getItem('cart');
+      const currentCart = JSON.parse(savedCart);
+
+      if (!currentCart) {
+        setCartState();
+      } else {
+        setCartState(currentCart);
+      }
+      console.log({currentCart: currentCart});
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getCart();
+    console.log({cartState});
+  }, []);
+
   const [dataAmountCheckout, setDataAmountCheckout] = useState(0);
-  const [dataCheckout, setDataCheckout] = useState([]);
+  const [dataWeightCheckout, setDataWeightCheckout] = useState(0);
+
+  // ** request
+  const [dataCoupon, setDataCoupon] = useState(false);
+  const [dataCouponId, setDataCouponId] = useState(0);
+  const [dataCouponName, setDataCouponName] = useState('');
+  const [dataCouponDiscount, setDataCouponDiscount] = useState(0);
+  const [dataRequest, setDataRequest] = useState({});
 
   useEffect(() => {
     var totalAmount = 0;
+    var totalWeight = 0;
+
     var calculateAmount = 0;
-    cart.forEach(element => {
+    var calculateWeight = 0;
+
+    cartState.forEach(element => {
+      console.log({element});
       const amount = element.product_price * element.qty;
+      const weight = element.product_weight * element.qty;
 
       totalAmount = calculateAmount += amount;
+      totalWeight = calculateWeight += weight;
     });
+
     setDataAmountCheckout(totalAmount);
-    console.log({dataAmountCheckout});
-  }, [dataAmountCheckout]);
+    setDataWeightCheckout(totalWeight);
+  }, []);
 
   const numberOfItemsPerPageList = [1];
   const [page, setPage] = React.useState(0);
@@ -55,37 +117,74 @@ const Cart = ({route}) => {
     setPage(0);
   }, [numberOfItemsPerPage]);
 
-  const fetchProduk = async () => {
-    // const logtoken = await AsyncStorage.getItem('Logtoken-token');
-    // const cart = await AsyncStorage.getItemo('Keranjang');
-    // Axios.get(
-    //   `${API_URL}/apiproduk/?id_produk=${route.params?.id_produk}`,
-    //   {
-    //     headers: {
-    //       Authorization: `Bearer ${logtoken}`,
-    //     },
-    //   },
-    // ).then(res => {
-    //   console.log('res fetchproduk : ', res.data.data);
-    //   setCart(cart);
-    // });
+  const GetCoupon = async () => {
+    if (dataCouponName === '') {
+      Alert.alert('Coupon', 'Apply coupon tidak boleh kosong');
+      return;
+    }
+
+    await axios
+      .get(`${API_URL}api/auth/coupon`, {
+        params: {
+          coupon: dataCouponName.toUpperCase(),
+        },
+      })
+      .then(success => {
+        const response = success.data;
+
+        if (response.expired) {
+          Alert.alert('Coupon', 'Coupon sudah expired');
+        }
+
+        if (!response.coupon) {
+          Alert.alert('Coupon', 'Coupon tidak ditemukan');
+        }
+
+        console.log({response});
+
+        setDataCoupon(true);
+        setDataCouponId(response.coupon.coupon_id ?? 0);
+        setDataCouponName(response.coupon.coupon_name ?? '');
+        setDataCouponDiscount(response.coupon.coupon_discount);
+
+        const disc = discount(
+          Number(dataAmountCheckout),
+          Number(response.coupon.coupon_discount),
+        );
+        console.log({dataAmountCheckout});
+        console.log({dataCouponDiscount});
+        console.log({dataCouponDiscount: response.coupon.coupon_discount});
+        console.log({disc});
+        setDataAmountCheckout(disc);
+      })
+      .catch(error => {
+        console.log({errorCoupon: error});
+      });
   };
 
-  useEffect(() => {
-    fetchProduk();
-  }, []);
+  const DoCheckout = () => {
+    const payloadDataRequest = {
+      couponid: dataCouponId ?? null,
+      couponvalue: dataCouponDiscount ?? null,
+      totalOrder: dataAmountCheckout,
+      address: dataUser?.user?.data?.address ?? '',
+      total_weight: dataWeightCheckout,
+      province: '',
+      district: '',
+      type: '',
+      postal_code: '',
+      expedition: '',
+      package: '',
+      shipping_costs: 0,
+      estimation: '',
+    };
+    console.log({payloadDataRequest});
+    setDataRequest();
 
-  const getdata = async () => {
-    // const cart = await AsyncStorage.getItemo('Keranjang');
-    console.log('wkowdwd', JSON.stringify(cart));
-    // console.log(cart.produk.harga);
-  };
-
-  const removeitem = async () => {
-    // const cart1 = await AsyncStorage.removeItem('Keranjang-id');
-    // const cart2 = await AsyncStorage.removeItem('Keranjang-jm');
-    // const cart3 = await AsyncStorage.removeItem('Keranjang');
-    // console.log(cart1, cart2, cart3);
+    navigation.push('CheckoutScreen', {
+      totalWeight: dataWeightCheckout,
+      request: payloadDataRequest,
+    });
   };
 
   const indFormatCurrency = props => {
@@ -101,17 +200,24 @@ const Cart = ({route}) => {
     return <NumberFormatBase {...props} format={format} />;
   };
 
+  function discount(valuePrice, valueDiscount) {
+    var total = (valuePrice * valueDiscount) / 100;
+    var fix = valuePrice - total;
+    return fix;
+  }
+
   return (
     <View style={tw`flex-1`}>
-      <Navbar />
+      <Navbar btnCart={false} btnLogout={false} />
       {/* <Button onPress={getdata} title="testttt" />
       <Button onPress={removeitem} title="removee keranjang" /> */}
 
       <SafeAreaView>
         <ScrollView>
           <View style={tw`mt-5`}>
-            {cart?.length > 0 ? (
-              cart.map(item => {
+            {cartState?.length > 0 ? (
+              cartState.map(item => {
+                console.log({item});
                 const firstProduct = item.product_picture.split(',')[0] ?? [];
                 return (
                   <View
@@ -149,11 +255,37 @@ const Cart = ({route}) => {
       </SafeAreaView>
 
       <View style={tw`bg-white shadow-md absolute bottom-0 w-full`}>
-        <View style={tw`flex flex-row justify-between`}>
+        {/* COUPON */}
+        <View style={tw`flex flex-row justify-between items-center`}>
+          <View style={tw`ml-4 w-52`}>
+            <TextInput
+              style={tw`border-[1px] border-gray-400 rounded text-black ${
+                dataCoupon ? 'bg-gray-200' : 'bg-white'
+              }`}
+              editable={!dataCoupon}
+              placeholder="Coupon (Optional)"
+              value={dataCouponName}
+              onChangeText={text => {
+                setDataCouponName(text.toUpperCase());
+              }}
+            />
+          </View>
+          <TouchableOpacity disabled={dataCoupon} onPress={() => GetCoupon()}>
+            <Text
+              style={tw`text-black font-semibold p-5 text-white shadow w-[140px] text-center ${
+                !dataCoupon ? 'bg-pink-600' : 'bg-pink-900'
+              }`}>
+              Applied Coupon
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* CHECKOUT */}
+        <View style={tw`flex flex-row justify-between items-center`}>
           <Text style={tw`text-black font-semibold p-5`}>
             Amount: Rp{dataAmountCheckout}
           </Text>
-          <TouchableOpacity onPress={() => navigation.push('CheckoutScreen')}>
+          <TouchableOpacity onPress={() => DoCheckout()}>
             <Text
               style={tw`text-black font-semibold p-5 text-white shadow w-[140px] text-center bg-pink-400`}>
               Checkout
