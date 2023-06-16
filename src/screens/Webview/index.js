@@ -33,7 +33,12 @@ const WebviewPayment = props => {
 
   return (
     <WebView
-      source={{uri: params.redirect}}
+      source={{
+        uri: params.redirect,
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
+      }}
       onNavigationStateChange={event => handleNavigationStateChange(event)}
       style={{flex: 1}}
     />
