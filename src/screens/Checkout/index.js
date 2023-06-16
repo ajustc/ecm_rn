@@ -188,7 +188,7 @@ const Checkout = props => {
     const payloads = {
       origin: dataCheckoutProvince,
       destination: dataCheckoutCity,
-      weight: params.request.total_weight,
+      weight: params.request.total_weight ?? params.totalWeight,
       courier: dataCourier,
     };
 
