@@ -39,13 +39,69 @@ const ProfileEdit = props => {
     }, 1500);
   }, []);
 
-  const user = useSelector(state => state.user);
+  const [dataUser, setDataUser] = useState({
+    isLoggedIn: false,
+  });
 
-  const [name, setName] = useState();
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
-  const [phone, setPhone] = useState();
-  const [address, setAddress] = useState();
+  const getUser = async () => {
+    try {
+      const savedUser = await AsyncStorage.getItem('user');
+      const currentUser = JSON.parse(savedUser);
+
+      setDataUser(currentUser);
+
+      setName(currentUser.user.data.name);
+      setEmail(currentUser.user.data.email);
+      setPassword(currentUser.user.data.password);
+      setPhone(currentUser.user.data.phone);
+      setAddress(currentUser.user.data.address);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  console.log({dataUser: dataUser.user.data});
+  console.log({name});
+
+  const [name, setName] = useState(dataUser?.user?.data?.name);
+  const [email, setEmail] = useState(dataUser?.user?.data?.email);
+  const [password, setPassword] = useState(dataUser?.user?.data?.password);
+  const [phone, setPhone] = useState(dataUser?.user?.data?.phone);
+  const [address, setAddress] = useState(dataUser?.user?.data?.address);
+
+  const handleEditProfile = () => {
+    if (!name || !email || !password || !phone || !address) {
+      Alert.alert('Please fill all fields');
+      return false;
+    }
+
+    axios
+      .post(
+        `${API_URL}api/auth/editprofile/${dataUser?.user?.data?.uid}`,
+        {
+          name,
+          email,
+          password,
+          phone,
+          address,
+        },
+        {
+          headers: {
+            Authorization: `${dataUser.access_token}`,
+          },
+        },
+      )
+      .then(success => {
+        console.log(success);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
 
   return (
     <ScrollView
@@ -74,14 +130,6 @@ const ProfileEdit = props => {
           />
           <TextInput
             style={tw`w-[360px] text-[16px] border-[1px] border-gray-500 my-3 text-black rounded`}
-            value={password}
-            onChangeText={text => setPassword(text)}
-            placeholder="email"
-            placeholderTextColor="#000"
-            keyboardType="password"
-          />
-          <TextInput
-            style={tw`w-[360px] text-[16px] border-[1px] border-gray-500 my-3 text-black rounded`}
             value={phone}
             onChangeText={text => setPhone(text)}
             placeholder="phone"
@@ -95,7 +143,17 @@ const ProfileEdit = props => {
             placeholder="address"
             placeholderTextColor="#000"
             keyboardType="text"
+            multiline={true}
+            numberOfLines={3}
+            textAlignVertical="top"
           />
+
+          <TouchableOpacity onPress={() => handleEditProfile()}>
+            <Text
+              style={tw`text-center text-white self-center shadow bg-[#917FB3] w-[250px] rounded py-3`}>
+              Save
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>

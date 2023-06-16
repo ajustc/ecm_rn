@@ -166,6 +166,7 @@ const Checkout = props => {
   };
 
   const storageExpedition = data => {
+    console.log({data});
     var dataCourier;
     switch (data) {
       case '1':
@@ -187,7 +188,7 @@ const Checkout = props => {
     const payloads = {
       origin: dataCheckoutProvince,
       destination: dataCheckoutCity,
-      weight: params.totalWeight,
+      weight: params.request.total_weight,
       courier: dataCourier,
     };
 
@@ -238,7 +239,7 @@ const Checkout = props => {
           // setData(data);
         })
         .catch(error => {
-          console.log({error});
+          console.log({GetCost: error});
         });
     }
   };
