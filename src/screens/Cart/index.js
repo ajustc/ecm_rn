@@ -32,6 +32,8 @@ const Cart = ({route}) => {
   // const dataUser = user;
   // console.log({dataUserssssss: dataUser});
 
+  const [firedCalculate, setFiredCalculate] = useState(false);
+
   const [dataUser, setDataUser] = useState({
     isLoggedIn: false,
   });
@@ -64,6 +66,8 @@ const Cart = ({route}) => {
       } else {
         setCartState(currentCart);
       }
+      setFiredCalculate(true);
+      console.log('setFiredCalculate');
       console.log({currentCart: currentCart});
     } catch (error) {
       console.log(error);
@@ -85,7 +89,8 @@ const Cart = ({route}) => {
   const [dataCouponDiscount, setDataCouponDiscount] = useState(0);
   const [dataRequest, setDataRequest] = useState({});
 
-  useEffect(() => {
+  const calculateWeightAmount = () => {
+    console.log('calculateWeightAmount');
     var totalAmount = 0;
     var totalWeight = 0;
 
@@ -103,7 +108,14 @@ const Cart = ({route}) => {
 
     setDataAmountCheckout(totalAmount);
     setDataWeightCheckout(totalWeight);
-  }, []);
+  };
+
+  useEffect(() => {
+    if (firedCalculate) {
+      console.log('fired');
+      calculateWeightAmount();
+    }
+  }, [firedCalculate]);
 
   const numberOfItemsPerPageList = [1];
   const [page, setPage] = React.useState(0);
