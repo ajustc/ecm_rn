@@ -29,9 +29,9 @@ const Navbar = props => {
       } else {
         setDataUser(currentUser);
       }
-      console.log({currentUser: currentUser});
+      console.log({dataUser});
     } catch (error) {
-      console.log(error);
+      console.log({getUser: error});
     }
   };
 
@@ -51,15 +51,13 @@ const Navbar = props => {
       } else {
         setCartState(currentCart);
       }
-      console.log({currentCart: currentCart});
     } catch (error) {
-      console.log(error);
+      console.log({getCart: error});
     }
   };
 
   useEffect(() => {
     getCart();
-    console.log({cartState});
   }, []);
 
   return (

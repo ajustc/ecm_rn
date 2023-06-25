@@ -52,11 +52,10 @@ const ProfileEdit = props => {
 
       setName(currentUser.user.data.name);
       setEmail(currentUser.user.data.email);
-      setPassword(currentUser.user.data.password);
       setPhone(currentUser.user.data.phone);
       setAddress(currentUser.user.data.address);
     } catch (error) {
-      console.log(error);
+      console.log({getUser: error});
     }
   };
 
@@ -64,17 +63,17 @@ const ProfileEdit = props => {
     getUser();
   }, []);
 
-  console.log({dataUser: dataUser.user.data});
-  console.log({name});
+  const [updatedProfile, setUpdatedProfile] = useState(0);
 
   const [name, setName] = useState(dataUser?.user?.data?.name);
   const [email, setEmail] = useState(dataUser?.user?.data?.email);
-  const [password, setPassword] = useState(dataUser?.user?.data?.password);
   const [phone, setPhone] = useState(dataUser?.user?.data?.phone);
   const [address, setAddress] = useState(dataUser?.user?.data?.address);
 
   const handleEditProfile = () => {
-    if (!name || !email || !password || !phone || !address) {
+    console.log({dataUser});
+    console.log({userId: dataUser?.user?.data?.uid});
+    if (!name || !email || !phone || !address) {
       Alert.alert('Please fill all fields');
       return false;
     }
@@ -85,7 +84,7 @@ const ProfileEdit = props => {
         {
           name,
           email,
-          password,
+          password: null,
           phone,
           address,
         },
@@ -97,9 +96,11 @@ const ProfileEdit = props => {
       )
       .then(success => {
         console.log(success);
+        setUpdatedProfile(1);
       })
       .catch(error => {
-        console.log(error);
+        setUpdatedProfile(2);
+        console.log({handleEditProfile: error});
       });
   };
 
@@ -110,16 +111,22 @@ const ProfileEdit = props => {
         <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
       }>
       <Navbar />
-      <View style={tw`flex p-[20px]`}>
+      <View style={tw`flex p-[16px]`}>
         <View style={tw`bg-gray-100 rounded-lg`}>
+          <Text>Name</Text>
           <TextInput
             style={tw`w-[360px] text-[16px] border-[1px] border-gray-500 my-3 text-black rounded`}
             value={name}
             onChangeText={text => setName(text)}
             placeholder="name"
             placeholderTextColor="#000"
-            keyboardType="text"
+            keyboardType="default"
           />
+          <Text>
+            Email
+            {` `}
+            <Text style={tw`text-xs text-red-500`}>*must unique</Text>
+          </Text>
           <TextInput
             style={tw`w-[360px] text-[16px] border-[1px] border-gray-500 my-3 text-black rounded`}
             value={email}
@@ -128,25 +135,37 @@ const ProfileEdit = props => {
             placeholderTextColor="#000"
             keyboardType="email-address"
           />
+          <Text>Phone</Text>
           <TextInput
             style={tw`w-[360px] text-[16px] border-[1px] border-gray-500 my-3 text-black rounded`}
             value={phone}
             onChangeText={text => setPhone(text)}
             placeholder="phone"
             placeholderTextColor="#000"
-            keyboardType="number"
+            keyboardType="number-pad"
           />
+          <Text>Address</Text>
           <TextInput
             style={tw`w-[360px] text-[16px] border-[1px] border-gray-500 my-3 text-black rounded`}
             value={address}
             onChangeText={text => setAddress(text)}
             placeholder="address"
             placeholderTextColor="#000"
-            keyboardType="text"
+            keyboardType="default"
             multiline={true}
             numberOfLines={3}
             textAlignVertical="top"
           />
+
+          {updatedProfile === 1 ? (
+            <Text style={tw`text-center text-green-500`}>
+              Profile success updated
+            </Text>
+          ) : updatedProfile === 2 ? (
+            <Text style={tw`text-center text-red-500`}>
+              Profile failed updated
+            </Text>
+          ) : null}
 
           <TouchableOpacity onPress={() => handleEditProfile()}>
             <Text

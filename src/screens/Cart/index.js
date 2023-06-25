@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Modal,
 } from 'react-native';
 import {DataTable} from 'react-native-paper';
 import {NumberFormat, NumberFormatBase} from 'react-number-format';
@@ -29,6 +30,8 @@ const Cart = ({route}) => {
   const user = useSelector(state => state.user);
   const cart = useSelector(state => state.cart);
 
+  const [modalAddress, setModalAddress] = useState(false);
+
   // const dataUser = user;
   // console.log({dataUserssssss: dataUser});
 
@@ -38,12 +41,17 @@ const Cart = ({route}) => {
     isLoggedIn: false,
   });
 
+  const [optionalAddress, setOptionalAddress] = useState(
+    dataUser?.user?.data?.address,
+  );
+
   const getUser = async () => {
     try {
       const savedUser = await AsyncStorage.getItem('user');
       const currentUser = JSON.parse(savedUser);
 
       setDataUser(currentUser);
+      setOptionalAddress(currentUser?.user?.data?.address);
       console.log({currentUser});
     } catch (error) {
       console.log(error);
@@ -87,7 +95,6 @@ const Cart = ({route}) => {
   const [dataCouponId, setDataCouponId] = useState(0);
   const [dataCouponName, setDataCouponName] = useState('');
   const [dataCouponDiscount, setDataCouponDiscount] = useState(0);
-  const [dataRequest, setDataRequest] = useState({});
 
   const calculateWeightAmount = () => {
     console.log('calculateWeightAmount');
@@ -97,14 +104,17 @@ const Cart = ({route}) => {
     var calculateAmount = 0;
     var calculateWeight = 0;
 
-    cartState.forEach(element => {
-      console.log({element});
-      const amount = element.product_price * element.qty;
-      const weight = element.product_weight * element.qty;
+    if (cartState?.length > 0) {
+      cartState.forEach(element => {
+        const amount =
+          discount(element.product_price, element.product_discount) *
+          element.qty;
+        const weight = element.product_weight * element.qty;
 
-      totalAmount = calculateAmount += amount;
-      totalWeight = calculateWeight += weight;
-    });
+        totalAmount = calculateAmount += amount;
+        totalWeight = calculateWeight += weight;
+      });
+    }
 
     setDataAmountCheckout(totalAmount);
     setDataWeightCheckout(totalWeight);
@@ -122,8 +132,6 @@ const Cart = ({route}) => {
   const [numberOfItemsPerPage, onItemsPerPageChange] = React.useState(
     numberOfItemsPerPageList[0],
   );
-  const from = page * numberOfItemsPerPage;
-  const to = Math.min((page + 1) * numberOfItemsPerPage, cart?.length);
 
   React.useEffect(() => {
     setPage(0);
@@ -158,16 +166,6 @@ const Cart = ({route}) => {
         setDataCouponId(response.coupon.coupon_id ?? 0);
         setDataCouponName(response.coupon.coupon_name ?? '');
         setDataCouponDiscount(response.coupon.coupon_discount);
-
-        const disc = discount(
-          Number(dataAmountCheckout),
-          Number(response.coupon.coupon_discount),
-        );
-        console.log({dataAmountCheckout});
-        console.log({dataCouponDiscount});
-        console.log({dataCouponDiscount: response.coupon.coupon_discount});
-        console.log({disc});
-        setDataAmountCheckout(disc);
       })
       .catch(error => {
         console.log({errorCoupon: error});
@@ -175,11 +173,21 @@ const Cart = ({route}) => {
   };
 
   const DoCheckout = () => {
+    if (dataUser?.isLoggedIn === false || !dataUser) {
+      Alert.alert('Pesan', 'Harap login terlebih dahulu', [
+        {
+          text: 'OK',
+          onPress: () => navigation.replace('LoginScreen'),
+        },
+      ]);
+      return;
+    }
+
     const payloadDataRequest = {
       couponid: dataCouponId ?? null,
       couponvalue: dataCouponDiscount ?? null,
       totalOrder: dataAmountCheckout,
-      address: dataUser?.user?.data?.address ?? '',
+      address: optionalAddress,
       total_weight: dataWeightCheckout,
       province: '',
       district: '',
@@ -191,7 +199,6 @@ const Cart = ({route}) => {
       estimation: '',
     };
     console.log({payloadDataRequest});
-    setDataRequest();
 
     navigation.push('CheckoutScreen', {
       totalWeight: dataWeightCheckout,
@@ -221,15 +228,12 @@ const Cart = ({route}) => {
   return (
     <View style={tw`flex-1`}>
       <Navbar btnCart={false} btnLogout={false} />
-      {/* <Button onPress={getdata} title="testttt" />
-      <Button onPress={removeitem} title="removee keranjang" /> */}
 
       <SafeAreaView>
         <ScrollView>
           <View style={tw`mt-5`}>
             {cartState?.length > 0 ? (
               cartState.map(item => {
-                console.log({item});
                 const firstProduct = item.product_picture.split(',')[0] ?? [];
                 return (
                   <View
@@ -247,12 +251,19 @@ const Cart = ({route}) => {
                         {item.product_name}
                       </Text>
                     </View>
+                    <Text
+                      style={tw`text-black bg-gray-300 w-18 text-center py-2 my-2 rounded`}>
+                      {item.product_size}
+                    </Text>
                     <Text style={tw`text-black`}>
-                      Price : Rp{item.product_price}
+                      Price : Rp.{' '}
+                      {discount(item.product_price, item.product_discount)}
                     </Text>
                     <Text style={tw`text-black`}>Quantity : {item.qty}</Text>
                     <Text style={tw`text-black`}>
-                      Sub Price : Rp{item.product_price * item.qty}
+                      Sub Price : Rp.{' '}
+                      {discount(item.product_price, item.product_discount) *
+                        item.qty}
                     </Text>
                   </View>
                 );
@@ -267,6 +278,43 @@ const Cart = ({route}) => {
       </SafeAreaView>
 
       <View style={tw`bg-white shadow-md absolute bottom-0 w-full`}>
+        {/* COUPON */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalAddress}
+          onRequestClose={() => {
+            setModalAddress(!modalAddress);
+          }}>
+          <View
+            style={tw`bg-white border-[1px] border-gray-500 rounded shadow top-75 w-90 mx-auto`}>
+            <TextInput
+              style={tw`w-auto mx-2 px-3.5 text-[16px] border-[1px] border-gray-500 my-3 text-black rounded`}
+              value={optionalAddress}
+              onChangeText={text => setOptionalAddress(text)}
+              placeholder="optional address: komp. bintang blok 1 no. 1"
+              placeholderTextColor="#808080"
+              keyboardType="default"
+              multiline={true}
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+            <TouchableOpacity onPress={() => setModalAddress(false)}>
+              <Text
+                style={tw`mb-2 mx-2 ml-auto text-black font-semibold p-2 rounded text-white shadow w-[140px] text-center bg-blue-400`}>
+                Save Address
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+
+        <TouchableOpacity onPress={() => setModalAddress(true)}>
+          <Text
+            style={tw`text-black font-semibold p-5 text-white shadow text-center bg-blue-400`}>
+            Optional Address
+          </Text>
+        </TouchableOpacity>
+
         {/* COUPON */}
         <View style={tw`flex flex-row justify-between items-center`}>
           <View style={tw`ml-4 w-52`}>

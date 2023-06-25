@@ -24,10 +24,12 @@ const WebviewPayment = props => {
           id: params.order_id,
         });
       } else {
-        navigation.replace('OrderHistory');
+        navigation.replace('OrderHistory', {
+          firedHistoryFromWebview: true,
+        });
       }
 
-      AsyncStorage.clear();
+      AsyncStorage.removeItem('cart');
     }
   };
 

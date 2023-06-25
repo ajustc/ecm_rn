@@ -25,14 +25,6 @@ const Home = ({navigation}) => {
 
   const dispatch = useDispatch();
 
-  const onLogout = () => {
-    dispatch(logout()).then(response => {
-      if (response.status === 'success') {
-        navigation.replace('LoginScreen');
-      }
-    });
-  };
-
   const getProducts = async () => {
     console.log({getProducts: `${API_URL}api/auth/product/index`});
     await Axios.get(`${API_URL}api/auth/product/index`)
@@ -65,11 +57,13 @@ const Home = ({navigation}) => {
                 <Text style={tw`font-bold text-center`}>Loading</Text>
               ) : (
                 products.map(product => {
+                  console.log({product});
                   return (
                     <Product
                       key={product.product_id ?? ''}
                       product_id={product.product_id ?? ''}
                       product_name={product.product_name ?? ''}
+                      product_slug={product.product_slug ?? ''}
                       product_picture={product.product_picture ?? ''}
                       product_price={product.product_price ?? ''}
                       product_weight={Number(product.product_weight) ?? ''}

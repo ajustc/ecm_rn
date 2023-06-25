@@ -53,7 +53,7 @@ const Profile = props => {
       setDataUser(currentUser);
       console.log({currentUser});
     } catch (error) {
-      console.log(error);
+      console.log({getUser: error});
     }
   };
 
@@ -62,27 +62,10 @@ const Profile = props => {
     console.log({dataUser});
   }, []);
 
-  const GetOrderList = async () => {
-    await axios
-      .get(
-        `${API_URL}api/auth/order/showbyuserid/${dataUser?.user?.data?.uid}`,
-        {
-          headers: {
-            Authorization: `Bearer ${dataUser.access_token}`,
-          },
-        },
-      )
-      .then(success => {
-        const response = success?.data ?? [];
-        console.log({response});
-      })
-      .catch(error => {
-        console.log({error});
-      });
-  };
-
   const navigateOrderHistory = () => {
-    navigation.push('OrderHistory');
+    navigation.push('OrderHistory', {
+      firedHistoryFromWebview: true
+    });
   };
 
   const navigateEditProfile = () => {
@@ -98,10 +81,6 @@ const Profile = props => {
       }
     });
   };
-
-  useEffect(() => {
-    GetOrderList();
-  }, []);
 
   return (
     <ScrollView

@@ -9,10 +9,10 @@ getCart.then(asd => {
   initialState = asd === null ? [] : asd;
 });
 
-const updateQuantity = item =>
-  item.qty ? {...item, qty: item.qty + 1} : {...item, qty: 2};
+const updateQuantity = (item, qtyyy) =>
+  item.qty ? {...item, qty: Number(item.qty) + Number(qtyyy)} : {...item, qty: 2};
 
-export default cart = (state = initialState, action) => {
+export default cart = (state = initialState, action, qtyyy) => {
   const {type, payload} = action;
 
   switch (type) {
@@ -20,34 +20,20 @@ export default cart = (state = initialState, action) => {
       console.log('_____REDUCERS_____');
       console.log({payload});
 
-      // if (state.length === 0) {
-        const productInCart = state.find(
-          item => item.product_id === payload.product_id,
-        );
-        if (!productInCart) {
-          return [...state, payload];
+      const productInCart = state.find(
+        item => item.product_id === payload.product_id,
+      );
+      console.log({productInCart});
+      if (!productInCart) {
+        return [...state, payload];
+      }
+      return state.map(item => {
+        if (item.product_id === payload.product_id) {
+          return updateQuantity(item, qtyyy);
         }
-      // } else {
-        return state.map(item => {
-          if (item.product_id === payload.product_id) {
-            return updateQuantity(item);
-          }
-          console.log({item});
-          return item;
-        });
-
-        // res = state.map(item => {
-        //   console.log({ITEMMMM: item});
-        //   console.log({PAYLOADDD: payload});
-        //   if (item.product_id !== payload.product_id) {
-        //     return payload;
-        //   }
-        // });
-
-        // console.log({res});
-        // return state;
-      // }
-      // return;
+        console.log({item});
+        return item;
+      });
 
     default:
       return state;

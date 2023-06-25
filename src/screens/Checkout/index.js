@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Alert,
+  TextInput,
 } from 'react-native';
 import {useSelector} from 'react-redux';
 import SelectSearchable from '../../components/SelectSearchable';
@@ -85,6 +86,7 @@ const Checkout = props => {
   const [dataCheckoutExpedition, setDataCheckoutExpedition] = useState('');
   const [dataCheckoutEstimate, setDataCheckoutEstimate] = useState('');
   const [dataCheckoutPackage, setDataCheckoutPackage] = useState('');
+  const [dataCheckoutShippingCosts, setDataCheckoutShippingCosts] = useState('');
 
   const pyd = {
     productCart: cartState,
@@ -148,7 +150,6 @@ const Checkout = props => {
 
         var data = [];
         response.map(item => {
-          console.log({item});
           data.push({
             id: Number(item.city_id),
             title: item.city_name,
@@ -186,7 +187,7 @@ const Checkout = props => {
     setDataCheckoutExpedition(dataCourier);
 
     const payloads = {
-      origin: dataCheckoutProvince,
+      origin: 153,
       destination: dataCheckoutCity,
       weight: params.request.total_weight ?? params.totalWeight,
       courier: dataCourier,
@@ -196,12 +197,14 @@ const Checkout = props => {
   };
 
   const storageCost = data => {
-    var [_, shippingCosts, estimate] = data.split(' - ');
+    var [pkg, shippingCosts, estimate] = data.split(' - ');
     setDataCheckoutEstimate(estimate);
-    setDataCheckoutPackage(shippingCosts);
+    setDataCheckoutPackage(pkg);
+    setDataCheckoutShippingCosts(shippingCosts);
   };
 
   const GetCost = async payloads => {
+    console.log({getcost: payloads});
     if (
       payloads.destination !== 0 &&
       payloads.origin !== '' &&
@@ -211,6 +214,7 @@ const Checkout = props => {
         .get(`${API_URL}api/rajaongkir/getcost`, {params: payloads})
         .then(success => {
           var response = success?.data?.rajaongkir?.results[0]?.costs ?? [];
+          console.log({RAJAONGKIR: success?.data?.rajaongkir?.results});
           console.log({GetCost: response});
 
           var data = [];
@@ -221,8 +225,8 @@ const Checkout = props => {
             const shippingCosts = element.cost[0].value;
             const estimate = element.cost[0].etd;
 
-            console.log({pckg, shippingCosts, estimate});
             console.log({element});
+            console.log({element______: element.cost});
 
             const text = pckg + ' - ' + shippingCosts + ' - ' + estimate;
 
@@ -263,6 +267,12 @@ const Checkout = props => {
     console.log({dataCosts});
   });
 
+  function discount(valuePrice, valueDiscount) {
+    var total = (valuePrice * valueDiscount) / 100;
+    var fix = valuePrice - total;
+    return fix;
+  }
+
   const DoPay = async () => {
     pyd.request.province = dataCheckoutProvince;
     pyd.request.district = dataCheckoutCity;
@@ -272,6 +282,18 @@ const Checkout = props => {
     pyd.request.expedition = dataCheckoutExpedition;
     pyd.request.estimation = dataCheckoutEstimate;
     pyd.request.package = dataCheckoutPackage;
+    pyd.request.shipping_costs = dataCheckoutShippingCosts;
+
+    console.log({TOTAL_ORDER: pyd.request.totalOrder});
+    console.log({COUPON_VALUE: pyd.request.couponvalue});
+
+    const totalOrder = Number(pyd.request.totalOrder) + Number(dataCheckoutShippingCosts);
+    const disc = discount(totalOrder, Number(pyd.request.couponvalue));
+
+    console.log({DISC: disc});
+
+    pyd.request.totalOrder = disc;
+    pyd.request.couponvalue = disc;
 
     console.log({cartku: pyd.productCart});
 
@@ -286,7 +308,7 @@ const Checkout = props => {
       .then(success => {
         const response = success.data;
         const redirectUrl = response.snaptoken.redirect_url;
-        console.log({response: response.snaptoken});
+        console.log({response: response});
         console.log({response: response.snaptoken.redirect_url});
 
         navigation.push('WebviewScreen', {
@@ -295,8 +317,7 @@ const Checkout = props => {
         });
       })
       .catch(error => {
-        console.log(error.message);
-        console.log(error.error);
+        console.log({DoPay: error});
       });
   };
 
@@ -332,7 +353,7 @@ const Checkout = props => {
       />
 
       {/* CHECKOUT */}
-      <View style={tw`flex flex-row justify-between items-center`}>
+      <View style={tw`flex flex-row justify-center items-center`}>
         <TouchableOpacity onPress={() => DoPay()}>
           <Text
             style={tw`text-black font-semibold p-5 text-white shadow w-[140px] text-center bg-pink-400`}>

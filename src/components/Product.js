@@ -16,6 +16,7 @@ const Product = props => {
   const {
     product_id,
     product_name,
+    product_slug,
     product_picture,
     product_price,
     product_weight,
@@ -49,9 +50,10 @@ const Product = props => {
       style={tw`flex-col w-[180px] mx-2 mb-5 bg-white rounded-lg shadow-lg`}>
       <TouchableOpacity
         onPress={() =>
-          navigation.push('Product Detail', {
+          navigation.push('ProductDetailScreen', {
             product_id,
             product_name,
+            product_slug,
             product_picture,
             product_price,
             product_weight,
@@ -83,29 +85,6 @@ const Product = props => {
             />
             <Text style={tw`text-xs text-black`}>100 terjual </Text>
           </View>
-        </View>
-
-        <View style={tw`flex-row`}>
-          <TouchableOpacity
-            onPress={() => {
-              addToCart({
-                product_id,
-                product_name,
-                product_picture,
-                product_price,
-                product_weight,
-                product_discount,
-                qty: 1,
-              });
-            }}>
-            <Text
-              style={tw`w-[181px] text-center px-[10px] pt-[9px] pb-[5px] border-[3px] border-pink-400 bg-pink-400`}>
-              Beli
-            </Text>
-          </TouchableOpacity>
-          {/* <TouchableOpacity>
-            <Text style={styles.button_detail}>Detail</Text>
-          </TouchableOpacity> */}
         </View>
       </TouchableOpacity>
     </View>

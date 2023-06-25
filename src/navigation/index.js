@@ -13,6 +13,7 @@ import OrderList from './../screens/OrderList/index';
 import OrderDetail from './../screens/OrderDetail/index';
 
 import Webview from './../screens/Webview/index';
+import ProductDetailScreen from '../screens/ProductDetail';
 
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +44,11 @@ const Routing = () => (
       <Stack.Screen
         name="CartScreen"
         component={Cart}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="ProductDetailScreen"
+        component={ProductDetailScreen}
         options={{headerShown: false}}
       />
       <Stack.Screen

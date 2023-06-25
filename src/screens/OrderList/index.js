@@ -9,12 +9,12 @@ import {useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const OrderList = () => {
-  const [dataHistory, setDataHistory] = useState([]);
+const OrderList = props => {
+  const {firedHistoryFromWebview} = props.route.params;
 
   const navigation = useNavigation();
 
-  const user = useSelector(state => state.user);
+  const [firedHistory, setFiredHistory] = useState(firedHistoryFromWebview);
 
   const [dataUser, setDataUser] = useState({
     isLoggedIn: false,
@@ -26,25 +26,29 @@ const OrderList = () => {
       const currentUser = JSON.parse(savedUser);
 
       setDataUser(currentUser);
-      console.log({currentUser});
     } catch (error) {
-      console.log(error);
+      console.log({getUser: error});
     }
   };
 
-  useEffect(() => {
-    getUser();
-  }, []);
-  
+  // useEffect(() => {
+  //   getUser();
+  // }, [dataUser]);
+
   const capitalize = s => s && s[0].toUpperCase() + s.slice(1);
+
+  const [dataHistory, setDataHistory] = useState([]);
 
   const GetOrderList = async () => {
     await axios
-      .get(`${API_URL}api/auth/order/showbyuserid/${dataUser?.user?.data?.uid}`, {
-        headers: {
-          Authorization: `Bearer ${dataUser.access_token}`,
+      .get(
+        `${API_URL}api/auth/order/showbyuserid/${dataUser?.user?.data?.uid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${dataUser.access_token}`,
+          },
         },
-      })
+      )
       .then(success => {
         const response = success?.data ?? [];
         setDataHistory(response);
@@ -55,8 +59,9 @@ const OrderList = () => {
   };
 
   useEffect(() => {
+    getUser();
     GetOrderList();
-  }, []);
+  }, [dataHistory, dataUser]);
 
   const navigateOrderDetail = (status, id) => {
     console.log({status});
@@ -73,11 +78,13 @@ const OrderList = () => {
       <Navbar />
       {dataHistory.length > 0 ? (
         dataHistory.map(item => (
-          <View key={item.order_id} style={tw`bg-pink-100 py-[18px] px-[12px] shadow`}>
+          <View
+            key={item.order_id}
+            style={tw`bg-pink-100 py-[18px] px-[12px] shadow`}>
             <View style={tw`flex flex-row justify-between items-center`}>
               <View>
                 <Text>{item.order_purchase}</Text>
-                <Text style={tw`font-semibold`}>{item.order_total}</Text>
+                <Text style={tw`font-semibold`}>Rp. {item.order_total}</Text>
               </View>
 
               <Text>{capitalize(item.order_status)}</Text>
