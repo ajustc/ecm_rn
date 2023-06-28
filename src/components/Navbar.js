@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Text, View, TouchableOpacity} from 'react-native';
+import {Text, View, TouchableOpacity, Image} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -63,11 +63,16 @@ const Navbar = props => {
     <View>
       <View
         style={tw`flex-row justify-between bg-pink-400 py-[12px] px-[10px]`}>
-        <Text style={tw`text-[25px] text-white`}>JUSTC</Text>
-        <View style={tw`text-[20px] flex-row mr-[30px]`}>
+        <View style={tw`flex justify-center items-center`}>
+          {/* <Text style={tw`text-[16px] text-white`}>ORGANIC</Text>
+          <Text style={tw`text-[16px] text-white`}>FOOD</Text> */}
+
+          <Image source={require('../assets/ok.png')} style={tw`w-[50px] h-[50px]`} />
+        </View>
+        <View style={tw`text-[20px] self-center flex-row mr-[30px]`}>
           {btnCart !== false ? (
             <TouchableOpacity
-              style={tw`text-[20px] self-center mr-[10px]`}
+              style={tw`text-[20px] mr-[10px]`}
               onPress={() => navigation.push('CartScreen')}>
               {/* onPress={() => removeCart()}> */}
               <Icons.ShoppingCartIcon size={22} color={'white'} />
@@ -78,7 +83,7 @@ const Navbar = props => {
             </TouchableOpacity>
           ) : null}
         </View>
-        <View style={tw`text-[20px] flex-row mt-1`}>
+        <View style={tw`text-[20px] flex-row mt-1 text-center self-center`}>
           {dataUser.isLoggedIn ? (
             <TouchableOpacity
               style={tw`text-[20px] flex-row`}
