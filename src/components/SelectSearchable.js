@@ -11,7 +11,7 @@ import {
 // import SearchableDropdown from 'react-native-searchable-dropdown';
 // import SearchableDropdown from "searchable-dropdown-react-native";
 import tw from 'twrnc';
-import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
+import {AutocompleteDropdown} from 'react-native-autocomplete-dropdown';
 
 const SelectSearchable = ({items, callback, prefix, placeholder}) => {
   const [dataSelected, setDataSelected] = useState([]);
@@ -21,18 +21,18 @@ const SelectSearchable = ({items, callback, prefix, placeholder}) => {
     <View>
       <Text style={tw`text-black font-semibold ml-2`}>{placeholder}</Text>
       <AutocompleteDropdown
+        emptyResultText="Not found"
         clearOnFocus={false}
         closeOnBlur={true}
         closeOnSubmit={false}
-        initialValue={items[0]} // or just '2'
         showClear={false}
-        onSelectItem={(item) => {
+        onSelectItem={item => {
           if (item) {
-            setDataSelected(item)
-            if (prefix === "2") {
-              callback(item)
+            setDataSelected(item);
+            if (prefix === '2') {
+              callback(item);
             } else {
-              callback(item.id)
+              callback(item.id);
             }
           }
         }}

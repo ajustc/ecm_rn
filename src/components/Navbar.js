@@ -29,7 +29,6 @@ const Navbar = props => {
       } else {
         setDataUser(currentUser);
       }
-      console.log({dataUser});
     } catch (error) {
       console.log({getUser: error});
     }

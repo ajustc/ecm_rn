@@ -10,42 +10,48 @@ import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const OrderList = props => {
-  const {firedHistoryFromWebview} = props.route.params;
+  const {firedHistoryFromWebview = false} = props.route.params;
 
   const navigation = useNavigation();
 
   const [firedHistory, setFiredHistory] = useState(firedHistoryFromWebview);
 
-  const [dataUser, setDataUser] = useState({
-    isLoggedIn: false,
-  });
+  const [userToken, setUserToken] = useState();
+
+  const [dataUser, setDataUser] = useState();
 
   const getUser = async () => {
     try {
       const savedUser = await AsyncStorage.getItem('user');
       const currentUser = JSON.parse(savedUser);
 
+      const uid = currentUser?.user?.data?.uid
+      const token = currentUser?.access_token
+
+      setUserToken(token)
       setDataUser(currentUser);
+
+      GetOrderList(token, uid);
     } catch (error) {
       console.log({getUser: error});
     }
   };
 
-  // useEffect(() => {
-  //   getUser();
-  // }, [dataUser]);
+  useEffect(() => {
+    getUser();
+  }, []);
 
   const capitalize = s => s && s[0].toUpperCase() + s.slice(1);
 
   const [dataHistory, setDataHistory] = useState([]);
 
-  const GetOrderList = async () => {
+  const GetOrderList = async (token, uid) => {
     await axios
       .get(
-        `${API_URL}api/auth/order/showbyuserid/${dataUser?.user?.data?.uid}`,
+        `${API_URL}api/auth/order/showbyuserid/${uid}`,
         {
           headers: {
-            Authorization: `Bearer ${dataUser.access_token}`,
+            Authorization: `Bearer ${token}`,
           },
         },
       )
@@ -58,18 +64,11 @@ const OrderList = props => {
       });
   };
 
-  useEffect(() => {
-    getUser();
-    GetOrderList();
-  }, [dataHistory, dataUser]);
-
-  const navigateOrderDetail = (status, id) => {
-    console.log({status});
-    console.log({id});
-
+  const navigateOrderDetail = (status, id, token) => {
     navigation.push('OrderDetail', {
       status,
       id,
+      token
     });
   };
 
@@ -77,30 +76,32 @@ const OrderList = props => {
     <View>
       <Navbar />
       {dataHistory.length > 0 ? (
-        dataHistory.map(item => (
-          <View
-            key={item.order_id}
-            style={tw`bg-pink-100 py-[18px] px-[12px] shadow`}>
-            <View style={tw`flex flex-row justify-between items-center`}>
-              <View>
-                <Text>{item.order_purchase}</Text>
-                <Text style={tw`font-semibold`}>Rp. {item.order_total}</Text>
+        dataHistory.map(item => {
+          return (
+            <View
+              key={item.order_id}
+              style={tw`bg-pink-100 py-[18px] px-[12px] shadow`}>
+              <View style={tw`flex flex-row justify-between items-center`}>
+                <View>
+                  <Text>{item.order_purchase}</Text>
+                  <Text style={tw`font-semibold`}>Rp. {item.order_total}</Text>
+                </View>
+
+                <Text>{capitalize(item.order_status)}</Text>
+
+                <TouchableOpacity
+                  onPress={() =>
+                    navigateOrderDetail(item.order_status, item.order_id, userToken)
+                  }>
+                  <Text
+                    style={tw`font-semibold bg-white py-[10px] px-[15px] rounded shadow`}>
+                    Order List
+                  </Text>
+                </TouchableOpacity>
               </View>
-
-              <Text>{capitalize(item.order_status)}</Text>
-
-              <TouchableOpacity
-                onPress={() =>
-                  navigateOrderDetail(item.order_status, item.order_id)
-                }>
-                <Text
-                  style={tw`font-semibold bg-white py-[10px] px-[15px] rounded shadow`}>
-                  Order List
-                </Text>
-              </TouchableOpacity>
             </View>
-          </View>
-        ))
+          );
+        })
       ) : (
         <View>
           <Text>No data history</Text>

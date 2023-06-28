@@ -5,6 +5,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import Home from './../screens/Home/index';
 import Login from './../screens/Login/index';
+import Register from './../screens/Register/index';
 import Profile from './../screens/Profile/index';
 import ProfileEdit from './../screens/ProfileEdit/index';
 import Cart from './../screens/Cart/index';
@@ -29,6 +30,11 @@ const Routing = () => (
       <Stack.Screen
         name="LoginScreen"
         component={Login}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="RegisterScreen"
+        component={Register}
         options={{headerShown: false}}
       />
       <Stack.Screen

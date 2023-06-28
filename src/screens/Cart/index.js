@@ -75,8 +75,6 @@ const Cart = ({route}) => {
         setCartState(currentCart);
       }
       setFiredCalculate(true);
-      console.log('setFiredCalculate');
-      console.log({currentCart: currentCart});
     } catch (error) {
       console.log(error);
     }
@@ -84,8 +82,7 @@ const Cart = ({route}) => {
 
   useEffect(() => {
     getCart();
-    console.log({cartState});
-  }, []);
+  }, [cartState]);
 
   const [dataAmountCheckout, setDataAmountCheckout] = useState(0);
   const [dataWeightCheckout, setDataWeightCheckout] = useState(0);
@@ -225,6 +222,22 @@ const Cart = ({route}) => {
     return fix;
   }
 
+  const removeItemCart = async (productId) => {
+    console.log({productId});
+
+    const existingCart = await AsyncStorage.getItem('cart');
+    const thisCart = JSON.parse(existingCart);
+
+    const cartItems = thisCart.filter(item => item.product_id !== productId);
+    console.log({existingCart});
+    console.log({thisCart});
+    console.log({cartItems});
+
+    await AsyncStorage.removeItem('cart');
+
+    await AsyncStorage.setItem('cart', JSON.stringify(cartItems));
+  }
+
   return (
     <View style={tw`flex-1`}>
       <Navbar btnCart={false} btnLogout={false} />
@@ -239,6 +252,14 @@ const Cart = ({route}) => {
                   <View
                     key={item.product_id}
                     style={tw`bg-white shadow rounded-lg p-5 mb-5`}>
+                    <TouchableOpacity style={tw`absolute shadow p-2 bg-gray-700 w-9 text-center rounded mb-5 absolute z-999 right-2 top-2`} onPress={() => removeItemCart(item.product_id)}>
+                      <Text
+                        style={tw`text-white text-center`}
+                        >
+                        X
+                      </Text>
+                    </TouchableOpacity>
+
                     <View style={tw`flex flex-row mb-4`}>
                       <Image
                         style={tw`w-[60px] h-[60px]`}

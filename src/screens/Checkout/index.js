@@ -86,7 +86,8 @@ const Checkout = props => {
   const [dataCheckoutExpedition, setDataCheckoutExpedition] = useState('');
   const [dataCheckoutEstimate, setDataCheckoutEstimate] = useState('');
   const [dataCheckoutPackage, setDataCheckoutPackage] = useState('');
-  const [dataCheckoutShippingCosts, setDataCheckoutShippingCosts] = useState('');
+  const [dataCheckoutShippingCosts, setDataCheckoutShippingCosts] =
+    useState('');
 
   const pyd = {
     productCart: cartState,
@@ -137,6 +138,21 @@ const Checkout = props => {
     setDataCheckoutCity(data.id);
     setDataCheckoutType(data.item.type);
     setDataCheckoutPostalCode(data.item.postal_code);
+
+    setDataExpedition([
+      {
+        id: '1',
+        title: 'POS',
+      },
+      {
+        id: '2',
+        title: 'TIKI',
+      },
+      {
+        id: '3',
+        title: 'JNE',
+      },
+    ]);
   };
 
   const GetCity = async provinceId => {
@@ -248,20 +264,7 @@ const Checkout = props => {
     }
   };
 
-  const dataExpedition = [
-    {
-      id: '1',
-      title: 'POS',
-    },
-    {
-      id: '2',
-      title: 'TIKI',
-    },
-    {
-      id: '3',
-      title: 'JNE',
-    },
-  ];
+  const [dataExpedition, setDataExpedition] = useState([]);
 
   useEffect(() => {
     console.log({dataCosts});
@@ -287,7 +290,8 @@ const Checkout = props => {
     console.log({TOTAL_ORDER: pyd.request.totalOrder});
     console.log({COUPON_VALUE: pyd.request.couponvalue});
 
-    const totalOrder = Number(pyd.request.totalOrder) + Number(dataCheckoutShippingCosts);
+    const totalOrder =
+      Number(pyd.request.totalOrder) + Number(dataCheckoutShippingCosts);
     const disc = discount(totalOrder, Number(pyd.request.couponvalue));
 
     console.log({DISC: disc});
@@ -314,6 +318,7 @@ const Checkout = props => {
         navigation.push('WebviewScreen', {
           redirect: redirectUrl,
           order_id: 0,
+          token: dataUser.access_token
         });
       })
       .catch(error => {

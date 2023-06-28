@@ -51,7 +51,6 @@ const Profile = props => {
       const currentUser = JSON.parse(savedUser);
 
       setDataUser(currentUser);
-      console.log({currentUser});
     } catch (error) {
       console.log({getUser: error});
     }
@@ -59,7 +58,6 @@ const Profile = props => {
 
   useEffect(() => {
     getUser();
-    console.log({dataUser});
   }, []);
 
   const navigateOrderHistory = () => {

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useState, useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {View, Text, TextInput, Button} from 'react-native';
+import {View, Text, TextInput, Button, TouchableOpacity} from 'react-native';
 import tw from 'twrnc';
 
 import {login} from './../../actions/auth';
@@ -53,7 +53,16 @@ const Login = ({navigation}) => {
         placeholder="password"
         keyboardType="default"
       />
-      <Button onPress={() => onLogin()} title="Login" />
+
+      <View style={tw`flex flex-col`}>
+        <TouchableOpacity style={tw`mb-5 mt-3`} onPress={() => navigation.replace('RegisterScreen')}>
+          <Text style={tw`text-black text-[16px]`}>
+            Don't have an account? Sign Up
+          </Text>
+        </TouchableOpacity>
+        
+        <Button onPress={() => onLogin()} title="Login" />
+      </View>
     </View>
   );
 };
