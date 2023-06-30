@@ -24,7 +24,6 @@ const Checkout = props => {
   const navigation = useNavigation();
 
   const {key, name, params} = props.route;
-  console.log({params});
 
   const user = useSelector(state => state.user);
   const cart = useSelector(state => state.cart);
@@ -41,9 +40,9 @@ const Checkout = props => {
       const currentUser = JSON.parse(savedUser);
 
       setDataUser(currentUser);
-      console.log({currentUser});
+      console.log({getUser: currentUser});
     } catch (error) {
-      console.log(error);
+      console.log({getUser: error});
     }
   };
 
@@ -63,15 +62,14 @@ const Checkout = props => {
       } else {
         setCartState(currentCart);
       }
-      console.log({currentCart: currentCart});
+      console.log({getCart: currentCart});
     } catch (error) {
-      console.log(error);
+      console.log({getCart: error});
     }
   };
 
   useEffect(() => {
     getCart();
-    console.log({cartState});
   }, []);
 
   const [dataProvince, setDataProvince] = useState([]);
@@ -97,8 +95,6 @@ const Checkout = props => {
     email: dataUser?.user?.data?.email,
   };
 
-  console.log({pyd});
-
   const storageProvince = provinceId => {
     setDataCheckoutProvince(provinceId);
 
@@ -109,7 +105,6 @@ const Checkout = props => {
     await axios
       .get(`${API_URL}api/rajaongkir/getprovince`)
       .then(success => {
-        console.log({successProvince: success.status});
         const response = success?.data ?? [];
         console.log({GetProvince: response});
 
@@ -126,7 +121,7 @@ const Checkout = props => {
         }
       })
       .catch(error => {
-        console.log({error});
+        console.log({GetProvince: error});
       });
   };
 
@@ -156,11 +151,9 @@ const Checkout = props => {
   };
 
   const GetCity = async provinceId => {
-    console.log('fired: ', provinceId);
     await axios
       .get(`${API_URL}api/rajaongkir/getcity?id_province=${provinceId}`)
       .then(success => {
-        console.log({successCity: success});
         const response = success?.data?.rajaongkir?.results ?? [];
         console.log({GetCity: response});
 
@@ -178,7 +171,7 @@ const Checkout = props => {
         }
       })
       .catch(error => {
-        console.log({error});
+        console.log({GetCity: error});
       });
   };
 
@@ -220,7 +213,6 @@ const Checkout = props => {
   };
 
   const GetCost = async payloads => {
-    console.log({getcost: payloads});
     if (
       payloads.destination !== 0 &&
       payloads.origin !== '' &&
@@ -230,7 +222,6 @@ const Checkout = props => {
         .get(`${API_URL}api/rajaongkir/getcost`, {params: payloads})
         .then(success => {
           var response = success?.data?.rajaongkir?.results[0]?.costs ?? [];
-          console.log({RAJAONGKIR: success?.data?.rajaongkir?.results});
           console.log({GetCost: response});
 
           var data = [];
@@ -240,9 +231,6 @@ const Checkout = props => {
             const pckg = element.service;
             const shippingCosts = element.cost[0].value;
             const estimate = element.cost[0].etd;
-
-            console.log({element});
-            console.log({element______: element.cost});
 
             const text = pckg + ' - ' + shippingCosts + ' - ' + estimate;
 
@@ -254,9 +242,6 @@ const Checkout = props => {
 
           setDataCosts(data);
 
-          console.log({data});
-
-          // setData(data);
         })
         .catch(error => {
           console.log({GetCost: error});
@@ -265,10 +250,6 @@ const Checkout = props => {
   };
 
   const [dataExpedition, setDataExpedition] = useState([]);
-
-  useEffect(() => {
-    console.log({dataCosts});
-  });
 
   function discount(valuePrice, valueDiscount) {
     var total = (valuePrice * valueDiscount) / 100;
@@ -287,21 +268,12 @@ const Checkout = props => {
     pyd.request.package = dataCheckoutPackage;
     pyd.request.shipping_costs = dataCheckoutShippingCosts;
 
-    console.log({TOTAL_ORDER: pyd.request.totalOrder});
-    console.log({COUPON_VALUE: pyd.request.couponvalue});
-
     const totalOrder =
       Number(pyd.request.totalOrder) + Number(dataCheckoutShippingCosts);
     const disc = discount(totalOrder, Number(pyd.request.couponvalue));
 
-    console.log({DISC: disc});
-
     pyd.request.totalOrder = disc;
     pyd.request.couponvalue = disc;
-
-    console.log({cartku: pyd.productCart});
-
-    console.log({pyd});
 
     await axios
       .post(`${API_URL}api/auth/checkout`, pyd, {
@@ -312,8 +284,8 @@ const Checkout = props => {
       .then(success => {
         const response = success.data;
         const redirectUrl = response.snaptoken.redirect_url;
-        console.log({response: response});
-        console.log({response: response.snaptoken.redirect_url});
+
+        console.log({DoPay: response});
 
         navigation.push('WebviewScreen', {
           redirect: redirectUrl,

@@ -2,19 +2,13 @@ import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   SafeAreaView,
-  Button,
 } from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
 import tw from 'twrnc';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Axios from 'axios';
 
 import {API_URL} from './../../services/constants';
-
-import {logout} from './../../actions/auth';
 
 import Product from './../../components/Product';
 import Navbar from './../../components/Navbar';
@@ -23,17 +17,15 @@ const Home = ({navigation}) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const dispatch = useDispatch();
-
   const getProducts = async () => {
-    console.log({getProducts: `${API_URL}api/auth/product/index`});
     await Axios.get(`${API_URL}api/auth/product/index`)
-      .then(res => {
-        setProducts(res.data.data);
-        console.log('Get Index Produk', res.data);
+      .then(success => {
+        const response = success.data.data
+        setProducts(response);
+        console.log({API_PRODUCT: response});
       })
-      .catch(err => {
-        console.log({err: err.message});
+      .catch(error => {
+        console.log({API_PRODUCT: error});
       });
   };
 

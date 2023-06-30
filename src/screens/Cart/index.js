@@ -1,10 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useState, useEffect} from 'react';
 import {
-  StyleSheet,
   Text,
   View,
-  Button,
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
@@ -12,11 +10,9 @@ import {
   Alert,
   Modal,
 } from 'react-native';
-import {DataTable} from 'react-native-paper';
-import {NumberFormat, NumberFormatBase} from 'react-number-format';
-import Axios from 'axios';
+import {NumberFormatBase} from 'react-number-format';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {API_URL, STORAGE_URL} from './../../services/constants';
+import {API_URL} from './../../services/constants';
 import {useSelector} from 'react-redux';
 import Navbar from './../../components/Navbar';
 import tw from 'twrnc';
@@ -31,9 +27,6 @@ const Cart = ({route}) => {
   const cart = useSelector(state => state.cart);
 
   const [modalAddress, setModalAddress] = useState(false);
-
-  // const dataUser = user;
-  // console.log({dataUserssssss: dataUser});
 
   const [firedCalculate, setFiredCalculate] = useState(false);
 
@@ -52,9 +45,9 @@ const Cart = ({route}) => {
 
       setDataUser(currentUser);
       setOptionalAddress(currentUser?.user?.data?.address);
-      console.log({currentUser});
+      console.log({getUser: currentUser});
     } catch (error) {
-      console.log(error);
+      console.log({getUser: error});
     }
   };
 
@@ -76,7 +69,7 @@ const Cart = ({route}) => {
       }
       setFiredCalculate(true);
     } catch (error) {
-      console.log(error);
+      console.log({getCart: error});
     }
   };
 
@@ -94,7 +87,6 @@ const Cart = ({route}) => {
   const [dataCouponDiscount, setDataCouponDiscount] = useState(0);
 
   const calculateWeightAmount = () => {
-    console.log('calculateWeightAmount');
     var totalAmount = 0;
     var totalWeight = 0;
 
@@ -119,7 +111,6 @@ const Cart = ({route}) => {
 
   useEffect(() => {
     if (firedCalculate) {
-      console.log('fired');
       calculateWeightAmount();
     }
   }, [firedCalculate]);
@@ -157,7 +148,7 @@ const Cart = ({route}) => {
           Alert.alert('Coupon', 'Coupon tidak ditemukan');
         }
 
-        console.log({response});
+        console.log({GetCoupon: response});
 
         setDataCoupon(true);
         setDataCouponId(response.coupon.coupon_id ?? 0);
@@ -165,7 +156,7 @@ const Cart = ({route}) => {
         setDataCouponDiscount(response.coupon.coupon_discount);
       })
       .catch(error => {
-        console.log({errorCoupon: error});
+        console.log({GetCoupon: error});
       });
   };
 
@@ -195,7 +186,6 @@ const Cart = ({route}) => {
       shipping_costs: 0,
       estimation: '',
     };
-    console.log({payloadDataRequest});
 
     navigation.push('CheckoutScreen', {
       totalWeight: dataWeightCheckout,
@@ -222,21 +212,16 @@ const Cart = ({route}) => {
     return fix;
   }
 
-  const removeItemCart = async (productId) => {
-    console.log({productId});
-
+  const removeItemCart = async productId => {
     const existingCart = await AsyncStorage.getItem('cart');
     const thisCart = JSON.parse(existingCart);
 
     const cartItems = thisCart.filter(item => item.product_id !== productId);
-    console.log({existingCart});
-    console.log({thisCart});
-    console.log({cartItems});
 
     await AsyncStorage.removeItem('cart');
 
     await AsyncStorage.setItem('cart', JSON.stringify(cartItems));
-  }
+  };
 
   return (
     <View style={tw`flex-1`}>
@@ -252,12 +237,10 @@ const Cart = ({route}) => {
                   <View
                     key={item.product_id}
                     style={tw`bg-white shadow rounded-lg p-5 mb-5`}>
-                    <TouchableOpacity style={tw`absolute shadow p-2 bg-gray-700 w-9 text-center rounded mb-5 absolute z-999 right-2 top-2`} onPress={() => removeItemCart(item.product_id)}>
-                      <Text
-                        style={tw`text-white text-center`}
-                        >
-                        X
-                      </Text>
+                    <TouchableOpacity
+                      style={tw`absolute shadow p-2 bg-gray-700 w-9 text-center rounded mb-5 absolute z-999 right-2 top-2`}
+                      onPress={() => removeItemCart(item.product_id)}>
+                      <Text style={tw`text-white text-center`}>X</Text>
                     </TouchableOpacity>
 
                     <View style={tw`flex flex-row mb-4`}>

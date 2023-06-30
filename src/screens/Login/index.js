@@ -22,6 +22,7 @@ const Login = ({navigation}) => {
 
     dispatch(login(dataUser))
       .then(response => {
+        console.log({response});
         if (response.status === 'success') {
           navigation.replace('HomeScreen');
         }

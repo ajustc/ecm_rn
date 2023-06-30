@@ -2,28 +2,19 @@
 /* eslint-disable no-unused-vars */
 import React, {useState, useCallback, useEffect} from 'react';
 import {
-  StyleSheet,
   Text,
   View,
   TouchableOpacity,
   Image,
-  Alert,
   ScrollView,
   RefreshControl,
-  FlatList,
 } from 'react-native';
-import {DataTable, Button} from 'react-native-paper';
 import tw from 'twrnc';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Axios from 'axios';
-
-// services
-import {API_URL} from './../../services/constants';
 
 // components
 import Navbar from './../../components/Navbar';
 import {useNavigation} from '@react-navigation/native';
-import axios from 'axios';
 import {useDispatch, useSelector} from 'react-redux';
 import {logout} from '../../actions/auth';
 
@@ -51,6 +42,7 @@ const Profile = props => {
       const currentUser = JSON.parse(savedUser);
 
       setDataUser(currentUser);
+      console.log({getUser: currentUser});
     } catch (error) {
       console.log({getUser: error});
     }
@@ -61,9 +53,7 @@ const Profile = props => {
   }, []);
 
   const navigateOrderHistory = () => {
-    navigation.push('OrderHistory', {
-      firedHistoryFromWebview: true
-    });
+    navigation.push('OrderHistory');
   };
 
   const navigateEditProfile = () => {
@@ -73,7 +63,9 @@ const Profile = props => {
   const dispatch = useDispatch();
   const navigateLogout = () => {
     dispatch(logout()).then(response => {
+
       if (response.status === 'success') {
+        console.log({navigateLogout: response});
         AsyncStorage.clear();
         navigation.replace('HomeScreen');
       }

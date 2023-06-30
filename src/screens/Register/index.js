@@ -27,7 +27,7 @@ const Register = ({navigation}) => {
       .post(`${API_URL}api/auth/register`, dataUser)
       .then(success => {
         const response = success.data;
-        console.log({response});
+        console.log({onRegister: response});
 
         navigation.replace('LoginScreen');
       })

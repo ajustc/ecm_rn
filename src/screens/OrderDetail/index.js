@@ -36,6 +36,7 @@ const OrderDetail = props => {
       const currentUser = JSON.parse(savedUser);
 
       setDataUser(currentUser);
+      console.log({GetUser: currentUser});
     } catch (error) {
       console.log({GetUser: error});
     }
@@ -83,9 +84,11 @@ const OrderDetail = props => {
       .then(success => {
         const response = success.data;
         setDataOrderList(response[0]);
+
+        console.log({GetOrderList: response[0]});
       })
       .catch(error => {
-        console.log({LIST: error});
+        console.log({GetOrderList: error});
       });
   };
 
@@ -99,9 +102,11 @@ const OrderDetail = props => {
       .then(success => {
         const response = success.data;
         setDataOrderDetail(response);
+
+        console.log({GetOrderDetail: response});
       })
       .catch(error => {
-        console.log({DETAIL: error});
+        console.log({GetOrderDetail: error});
       });
   };
 

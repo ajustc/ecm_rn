@@ -2,21 +2,17 @@
 /* eslint-disable no-unused-vars */
 import React, {useState, useCallback, useEffect} from 'react';
 import {
-  StyleSheet,
   Text,
   View,
   TouchableOpacity,
-  Image,
   Alert,
   ScrollView,
   RefreshControl,
   FlatList,
   TextInput,
 } from 'react-native';
-import {DataTable, Button} from 'react-native-paper';
 import tw from 'twrnc';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Axios from 'axios';
 
 // services
 import {API_URL} from './../../services/constants';
@@ -25,7 +21,6 @@ import {API_URL} from './../../services/constants';
 import Navbar from './../../components/Navbar';
 import {useNavigation} from '@react-navigation/native';
 import axios from 'axios';
-import {useSelector} from 'react-redux';
 
 const ProfileEdit = props => {
   const navigation = useNavigation();
@@ -54,6 +49,8 @@ const ProfileEdit = props => {
       setEmail(currentUser.user.data.email);
       setPhone(currentUser.user.data.phone);
       setAddress(currentUser.user.data.address);
+
+      console.log({getUser: currentUser});
     } catch (error) {
       console.log({getUser: error});
     }
@@ -71,8 +68,6 @@ const ProfileEdit = props => {
   const [address, setAddress] = useState(dataUser?.user?.data?.address);
 
   const handleEditProfile = () => {
-    console.log({dataUser});
-    console.log({userId: dataUser?.user?.data?.uid});
     if (!name || !email || !phone || !address) {
       Alert.alert('Please fill all fields');
       return false;
@@ -95,7 +90,7 @@ const ProfileEdit = props => {
         },
       )
       .then(success => {
-        console.log(success);
+        console.log({handleEditProfile: success});
         setUpdatedProfile(1);
       })
       .catch(error => {

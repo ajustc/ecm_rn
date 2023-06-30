@@ -64,11 +64,10 @@ const ProductDetailScreen = props => {
         const response = success.data;
 
         setProductSizeStock(response.sizestock);
-        console.log({product: response.product});
-        console.log({productSizeStock});
+        console.log({GetProductBySlug: response});
       })
       .catch(error => {
-        console.log({error});
+        console.log({GetProductBySlug: error});
       });
   };
 
@@ -93,13 +92,14 @@ const ProductDetailScreen = props => {
 
     dispatch(__addToCart(item, qty))
       .then(response => {
+        console.log({addToCart: response});
         if (response.status === 'success') {
           // setCartItems([...cartItems, item]);
           navigation.replace('HomeScreen');
         }
       })
       .catch(error => {
-        console.log({product: error});
+        console.log({addToCart: error});
       });
   };
 

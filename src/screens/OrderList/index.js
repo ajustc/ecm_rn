@@ -9,12 +9,8 @@ import {useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const OrderList = props => {
-  const {firedHistoryFromWebview = false} = props.route.params;
-
+const OrderList = () => {
   const navigation = useNavigation();
-
-  const [firedHistory, setFiredHistory] = useState(firedHistoryFromWebview);
 
   const [userToken, setUserToken] = useState();
 
@@ -32,6 +28,8 @@ const OrderList = props => {
       setDataUser(currentUser);
 
       GetOrderList(token, uid);
+
+      console.log({getUser: currentUser});
     } catch (error) {
       console.log({getUser: error});
     }
@@ -58,6 +56,8 @@ const OrderList = props => {
       .then(success => {
         const response = success?.data ?? [];
         setDataHistory(response);
+
+        console.log({GetOrderList: response});
       })
       .catch(error => {
         console.log({GetOrderList: error});
