@@ -36,6 +36,7 @@ const Home = ({navigation}) => {
   return (
     <>
       {/* NAVBAR */}
+      <Navbar />
 
       {/* CONTENT */}
       <View style={tw`flex mt-4 justify-center items-center`}>
