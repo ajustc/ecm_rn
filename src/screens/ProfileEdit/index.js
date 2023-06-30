@@ -90,7 +90,8 @@ const ProfileEdit = props => {
         },
       )
       .then(success => {
-        console.log({handleEditProfile: success});
+        const response = success.data
+        console.log({handleEditProfile: response});
         setUpdatedProfile(1);
       })
       .catch(error => {
