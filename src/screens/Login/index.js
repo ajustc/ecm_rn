@@ -22,13 +22,13 @@ const Login = ({navigation}) => {
 
     dispatch(login(dataUser))
       .then(response => {
-        console.log({response});
         if (response.status === 'success') {
+          console.log({onLogin: response});
           navigation.replace('HomeScreen');
         }
       })
       .catch(error => {
-        navigation.replace('LoginScreen');
+        console.log({onLogin: error});
       });
   };
 
