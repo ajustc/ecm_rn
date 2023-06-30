@@ -49,7 +49,6 @@ const Home = ({navigation}) => {
                 <Text style={tw`font-bold text-center`}>Loading</Text>
               ) : (
                 products.map(product => {
-                  console.log({product});
                   return (
                     <Product
                       key={product.product_id ?? ''}
